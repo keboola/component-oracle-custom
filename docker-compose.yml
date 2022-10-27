@@ -1,11 +1,12 @@
-version: "2"
+version: "2.4"
 services:
   # for development purposes
   dev:
     build: .
+    platform: linux/amd64
     volumes:
-        - ./:/code
-        - ./data:/data
+      - ./:/code
+      - ./data:/data
     environment:
       - KBC_DATADIR=./data
   test:
@@ -14,8 +15,25 @@ services:
     volumes:
       - ./:/code
       - ./data:/data
+    tty: true
+    stdin_open: true
     environment:
       - KBC_DATADIR=./data
+      - ORACLE_DB_HOST=oracle
+      - ORACLE_DB_PORT=1521
+      - ORACLE_DB_USER=system
+      - ORACLE_DB_PASSWORD=oracle
+      - ORACLE_DB_DATABASE=xe
+    depends_on:
+      - oracle
+    links:
+      - oracle
     command:
       - /bin/sh
       - /code/scripts/build_n_test.sh
+  oracle:
+    #    build: https://github.com/keboola/docker-oracle-xe-11g.git
+    image: wnameless/oracle-xe-11g-r2
+    ports:
+      - "8080:8080"
+      - "1521:1521"

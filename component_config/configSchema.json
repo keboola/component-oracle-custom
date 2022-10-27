@@ -1,19 +1,49 @@
 {
   "type": "object",
-  "title": "extractor configuration",
+  "title": "Authorization",
   "required": [
-    "print_hello"
+    "db"
   ],
   "properties": {
-    "print_hello": {
-      "type": "boolean",
-      "title": "Print Hello",
-      "propertyOrder": 1
-    },
-    "debug": {
-      "type": "boolean",
-      "title": "Debug",
-      "propertyOrder": 2
+    "db": {
+      "type": "object",
+      "title": "Authorization",
+      "required": [
+        "#password",
+        "host",
+        "port",
+        "user",
+        "database"
+      ],
+      "properties": {
+        "host": {
+          "type": "string",
+          "title": "Host",
+          "propertyOrder": 100
+        },
+        "port": {
+          "type": "number",
+          "title": "Port",
+          "default": 1521,
+          "propertyOrder": 200
+        },
+        "database": {
+          "type": "string",
+          "title": "Service Name/SID",
+          "propertyOrder": 250
+        },
+        "user": {
+          "type": "string",
+          "title": "User",
+          "propertyOrder": 450
+        },
+        "#password": {
+          "type": "string",
+          "title": "Password",
+          "format": "password",
+          "propertyOrder": 500
+        }
+      }
     }
   }
 }

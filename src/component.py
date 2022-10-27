@@ -2,21 +2,18 @@
 Template Component main class.
 
 """
-import csv
 import logging
-from datetime import datetime
 
 from keboola.component.base import ComponentBase
 from keboola.component.exceptions import UserException
 
 # configuration variables
-KEY_API_TOKEN = '#api_token'
-KEY_PRINT_HELLO = 'print_hello'
+import configuration
+from db_writer.writer import OracleWriter, OracleCredentials
 
-# list of mandatory parameters => if some is missing,
-# component will fail with readable message on initialization.
-REQUIRED_PARAMETERS = [KEY_PRINT_HELLO]
-REQUIRED_IMAGE_PARS = []
+INSTA_CLIENT_PATH = '/usr/local/instantclient'
+
+SQLLDR_PATH = 'sqlldr'
 
 
 class Component(ComponentBase):
@@ -32,45 +29,54 @@ class Component(ComponentBase):
 
     def __init__(self):
         super().__init__()
+        self._configuration: configuration.Configuration
+        self._oracle_writer: OracleWriter
 
     def run(self):
         """
         Main execution code
         """
 
-        # ####### EXAMPLE TO REMOVE
-        # check for missing configuration parameters
-        self.validate_configuration_parameters(REQUIRED_PARAMETERS)
-        self.validate_image_parameters(REQUIRED_IMAGE_PARS)
-        params = self.configuration.parameters
-        # Access parameters in data/config.json
-        if params.get(KEY_PRINT_HELLO):
-            logging.info("Hello World")
+        self._init_configuration()
+        self._init_writer_client()
 
-        # get last state data/in/state.json from previous run
-        previous_state = self.get_state_file()
-        logging.info(previous_state.get('some_state_parameter'))
+        if not self.get_input_tables_definitions():
+            raise UserException("No input table specified. Please provide one input table in the input mapping!")
+        input_table = self.get_input_tables_definitions()[0]
 
-        # Create output table (Tabledefinition - just metadata)
-        table = self.create_out_table_definition('output.csv', incremental=True, primary_key=['timestamp'])
+        load_type = self._configuration.loading_options.load_type
 
-        # get file path of the table (data/out/tables/Features.csv)
-        out_table_path = table.full_path
-        logging.info(out_table_path)
+        if load_type == 'full_load':
+            mode = self._configuration.loading_options.full_load_mode
+            self._oracle_writer.upload_full(input_table.full_path,
+                                            schema=self._configuration.schema,
+                                            table_name=self._configuration.table_name,
+                                            columns=input_table.columns)
+        elif load_type == 'incremental':
+            self._oracle_writer.upload_incremental(input_table.full_path,
+                                                   schema=self._configuration.schema,
+                                                   table_name=self._configuration.table_name,
+                                                   columns=input_table.columns,
+                                                   primary_key=input_table.primary_key
+                                                   )
 
-        # DO whatever and save into out_table_path
-        with open(table.full_path, mode='wt', encoding='utf-8', newline='') as out_file:
-            writer = csv.DictWriter(out_file, fieldnames=['timestamp'])
-            writer.writeheader()
-            writer.writerow({"timestamp": datetime.now().isoformat()})
+    def _init_configuration(self):
+        self.validate_configuration_parameters(configuration.Configuration.get_dataclass_required_parameters())
+        self._configuration: configuration.Configuration = configuration.Configuration.load_from_dict(
+            self.configuration.parameters)
 
-        # Save table manifest (output.csv.manifest) from the tabledefinition
-        self.write_manifest(table)
-
-        # Write new state - will be available next run
-        self.write_state_file({"some_state_parameter": "value"})
-
-        # ####### EXAMPLE TO REMOVE END
+    def _init_writer_client(self):
+        # build credentials
+        db_config = self._configuration.db
+        credentials = OracleCredentials(username=db_config.user,
+                                        password=db_config.pswd_password,
+                                        insta_client_path=INSTA_CLIENT_PATH,
+                                        host=db_config.host, port=db_config.port, service_name=db_config.database)
+        sql_loader_path = SQLLDR_PATH
+        self._oracle_writer = OracleWriter(credentials, log_folder='./temp/log',
+                                           sql_loader_path=sql_loader_path,
+                                           verbose_logging=self._configuration.debug)
+        self._oracle_writer.connect()
 
 
 """

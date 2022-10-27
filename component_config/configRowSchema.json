@@ -1,1 +1,128 @@
-{}
+{
+  "type": "object",
+  "title": "Table configuration",
+  "required": [
+    "table_name",
+    "loading_options",
+    "custom_column_mapping"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "title": "Destination table schema",
+      "propertyOrder": 100
+    },
+    "table_name": {
+      "type": "string",
+      "title": "Destination table name",
+      "propertyOrder": 102
+    },
+    "loading_options": {
+      "type": "object",
+      "propertyOrder": 150,
+      "title": "Loading options",
+      "required": [
+        "load_type"
+      ],
+      "properties": {
+        "load_type": {
+          "type": "string",
+          "title": "Load Type",
+          "enum": [
+            "incremental",
+            "full_load"
+          ],
+          "propertyOrder": 150
+        },
+        "full_load_mode": {
+          "type": "string",
+          "title": "Mode",
+          "required": true,
+          "default": "truncate_as_delete",
+          "options": {
+            "dependencies": {
+              "load_type": "full_load"
+            }
+          },
+          "enum": [
+            "defined_procedure",
+            "truncate_as_delete"
+          ],
+          "propertyOrder": 150
+        },
+        "full_load_procedure": {
+          "type": "string",
+          "title": "Full Load Procedure Name",
+          "description": "Name of procedure to be called prior full load, it needs to take exactly one parameter 'table name'",
+          "options": {
+            "dependencies": {
+              "full_load_mode": "defined_procedure"
+            }
+          },
+          "propertyOrder": 300
+        }
+      }
+    },
+    "custom_column_mapping": {
+      "type": "boolean",
+      "title": "Custom Column Mapping",
+      "format": "checkbox",
+      "propertyOrder": 200
+    },
+    "columns": {
+      "type": "array",
+      "format": "table",
+      "options": {
+        "dependencies": {
+          "custom_column_mapping": true
+        }
+      },
+      "items": {
+        "type": "object",
+        "title": "Column",
+        "required": [
+          "name",
+          "dbName",
+          "type",
+          "nullable",
+          "default",
+          "size"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Source Column",
+            "propertyOrder": 1
+          },
+          "dbName": {
+            "type": "string",
+            "title": "Destination Column",
+            "propertyOrder": 100
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "propertyOrder": 200
+          },
+          "nullable": {
+            "type": "boolean",
+            "title": "Nullable",
+            "propertyOrder": 300
+          },
+          "default": {
+            "type": "string",
+            "title": "Default",
+            "propertyOrder": 400
+          },
+          "size": {
+            "type": "string",
+            "title": "Size",
+            "propertyOrder": 500
+          }
+        }
+      },
+      "title": "Columns",
+      "propertyOrder": 600
+    }
+  }
+}

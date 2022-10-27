@@ -7,6 +7,10 @@ __pycache__/
 /example/.project
 /example/.pydevproject
 
+src/test.py
+src/temp
+/temp
+
 # kbc datafolder
 /data
 /venv
