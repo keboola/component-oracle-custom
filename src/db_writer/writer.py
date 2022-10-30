@@ -2,6 +2,7 @@ import csv
 import logging
 import logging.handlers
 import os
+import platform
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import List, Iterable, Optional, Literal, Tuple

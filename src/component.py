@@ -11,9 +11,9 @@ from keboola.component.exceptions import UserException
 import configuration
 from db_writer.writer import OracleWriter, OracleCredentials
 
-INSTA_CLIENT_PATH = '/usr/local/instantclient'
+INSTA_CLIENT_PATH = '/usr/local/instantclient_21_8'
 
-SQLLDR_PATH = 'sqlldr'
+SQLLDR_PATH = '/usr/local/instantclient_21_8/sqlldr'
 
 
 class Component(ComponentBase):
