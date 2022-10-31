@@ -3,6 +3,7 @@ Template Component main class.
 
 """
 import logging
+import os
 
 from keboola.component.base import ComponentBase
 from keboola.component.exceptions import UserException
@@ -11,9 +12,9 @@ from keboola.component.exceptions import UserException
 import configuration
 from db_writer.writer import OracleWriter, OracleCredentials
 
-INSTA_CLIENT_PATH = '/usr/local/instantclient_21_8'
+INSTA_CLIENT_PATH = os.environ.get('ORACLE_INSTANT_CLI_PATH', '/usr/local/instantclient_21_8')
 
-SQLLDR_PATH = '/usr/local/instantclient_21_8/sqlldr'
+SQLLDR_PATH = os.environ.get('SQLLOADER_PATH', '/usr/local/instantclient_21_8/sqlldr')
 
 
 class Component(ComponentBase):
@@ -47,7 +48,6 @@ class Component(ComponentBase):
         load_type = self._configuration.loading_options.load_type
 
         if load_type == 'full_load':
-            mode = self._configuration.loading_options.full_load_mode
             self._oracle_writer.upload_full(input_table.full_path,
                                             schema=self._configuration.schema,
                                             table_name=self._configuration.table_name,

@@ -2,7 +2,6 @@ import csv
 import logging
 import logging.handlers
 import os
-import platform
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import List, Iterable, Optional, Literal, Tuple
@@ -117,8 +116,7 @@ class OracleMetadataProvider:
         query = """SELECT COLUMN_NAME, DATA_TYPE, 
                          DATA_LENGTH, DATA_PRECISION, NULLABLE as nullable  
                     FROM ALL_TAB_COLS 
-                    where TABLE_NAME = :table_name AND OWNER = :schema
-        """
+                    where TABLE_NAME = :table_name AND OWNER = :schema"""  # noqa
         results = self.__connection.perform_query(query, {"table_name": table_name, "schema": schema})
         if not results:
             raise TableNotFoundError(f"The specified table {schema}.{table_name} was not found.")
@@ -207,7 +205,7 @@ class OracleWriter:
             binds      => true,
             plan_stat  => 'all_executions');
         end;
-        """
+        """  # noqa
         res = self._connection.perform_query(query)
         list(res)
         self.trace_enabled = True
@@ -220,7 +218,7 @@ class OracleWriter:
             session_id => {sid}, 
             serial_num => {serial});
         end;
-        """
+        """  # noqa
         res = self._connection.perform_query(query)
         list(res)
         self.trace_enabled = True
@@ -314,7 +312,7 @@ class OracleWriter:
                         columns: List[str], primary_key: List[str], table_metadata: TableSchema):
         temp_table_name = self._create_temp_table(table_name, table_metadata.columns)
 
-        self._load_data_into_table(data_path, None, temp_table_name, columns, method='query')
+        self._load_data_into_table(data_path, None, temp_table_name, columns, method='sqlldr')
 
         escape = self._connection.escape
         join_clause = ' AND '.join([f'a.{escape(col)}=b.{escape(col)}' for col in primary_key])
