@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 import dataconf
+from keboola.utils.helpers import comma_separated_values_to_list
 
 
 class ConfigurationBase:
@@ -55,9 +56,25 @@ class DbOptions(ConfigurationBase):
 
 
 @dataclass
+class Script(ConfigurationBase):
+    continue_on_failure: bool
+    script: str
+
+
+@dataclass
 class LoadingOptions(ConfigurationBase):
     load_type: str
-    full_load_mode: Optional[str] = None
+    full_load_mode: Optional[str] = 'truncate_as_delete'
+    incremental_load_mode: Optional[str] = 'sql_loader'
+    full_load_procedure: Optional[str] = None
+    full_load_procedure_parameters: Optional[str] = None
+
+    @property
+    def full_load_procedure_parameters_list(self):
+        if self.full_load_procedure_parameters:
+            return comma_separated_values_to_list(self.full_load_procedure_parameters)
+        else:
+            return None
 
 
 @dataclass
@@ -67,5 +84,9 @@ class Configuration(ConfigurationBase):
     schema: str
     table_name: str
     loading_options: LoadingOptions
+    post_run_script: bool = False
+    post_run_scripts: Optional[Script] = None
+    pre_run_script: bool = False
+    pre_run_scripts: Optional[Script] = None
     custom_column_mapping: bool = False
     debug: bool = False

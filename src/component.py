@@ -37,28 +37,53 @@ class Component(ComponentBase):
         """
         Main execution code
         """
-
+        self._init_loggers()
         self._init_configuration()
         self._init_writer_client()
 
         if not self.get_input_tables_definitions():
             raise UserException("No input table specified. Please provide one input table in the input mapping!")
         input_table = self.get_input_tables_definitions()[0]
+        loading_options = self._configuration.loading_options
+        load_type = loading_options.load_type
 
-        load_type = self._configuration.loading_options.load_type
+        if self._configuration.pre_run_scripts and self._configuration.pre_run_scripts.script:
+            logging.info(f"Pre script detected, running: {self._configuration.pre_run_scripts.script}")
+            self._oracle_writer.execute_script(self._configuration.pre_run_scripts.script,
+                                               self._configuration.pre_run_scripts.continue_on_failure)
 
         if load_type == 'full_load':
+            pre_procedure = loading_options.full_load_procedure
+            pre_procedure_params = loading_options.full_load_procedure_parameters_list
             self._oracle_writer.upload_full(input_table.full_path,
                                             schema=self._configuration.schema,
                                             table_name=self._configuration.table_name,
-                                            columns=input_table.columns)
+                                            columns=input_table.columns,
+                                            pre_procedure=pre_procedure,
+                                            pre_procedure_parameters=pre_procedure_params)
         elif load_type == 'incremental':
             self._oracle_writer.upload_incremental(input_table.full_path,
                                                    schema=self._configuration.schema,
                                                    table_name=self._configuration.table_name,
                                                    columns=input_table.columns,
-                                                   primary_key=input_table.primary_key
+                                                   primary_key=input_table.primary_key,
+                                                   method=loading_options.incremental_load_mode
                                                    )
+
+        if self._configuration.post_run_scripts and self._configuration.post_run_scripts.script:
+            logging.info(f"Post script detected, running: {self._configuration.post_run_scripts.script}")
+            self._oracle_writer.execute_script(self._configuration.post_run_scripts.script,
+                                               self._configuration.post_run_scripts.continue_on_failure)
+
+    def _init_loggers(self):
+        class DebugFilter(logging.Filter):
+            def filter(self, rec):
+                return not (rec.levelno == logging.DEBUG and rec.name == 'db_writer.writer')
+
+        if self.configuration.parameters.get('debug', False):
+            # let db_writer handle the debug logging in debug mode
+            for h in logging.getLogger().handlers:
+                h.addFilter(DebugFilter())
 
     def _init_configuration(self):
         self.validate_configuration_parameters(configuration.Configuration.get_dataclass_required_parameters())
@@ -76,7 +101,7 @@ class Component(ComponentBase):
         self._oracle_writer = OracleWriter(credentials, log_folder='./temp/log',
                                            sql_loader_path=sql_loader_path,
                                            verbose_logging=self._configuration.debug)
-        self._oracle_writer.connect()
+        self._oracle_writer.connect(ext_session_id=self.environment_variables.run_id)
 
 
 """

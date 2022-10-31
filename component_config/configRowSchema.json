@@ -40,6 +40,10 @@
           "required": true,
           "default": "truncate_as_delete",
           "options": {
+            "enum_titles": [
+              "Defined Procedure",
+              "SQL*Loader - REPLACE (DELETE)"
+            ],
             "dependencies": {
               "load_type": "full_load"
             }
@@ -50,16 +54,112 @@
           ],
           "propertyOrder": 150
         },
+        "incremental_load_mode": {
+          "type": "string",
+          "title": "Mode",
+          "required": true,
+          "default": "sql_loader",
+          "options": {
+            "dependencies": {
+              "load_type": "incremental"
+            }
+          },
+          "enum": [
+            "sql_loader",
+            "query"
+          ],
+          "propertyOrder": 150
+        },
         "full_load_procedure": {
           "type": "string",
           "title": "Full Load Procedure Name",
-          "description": "Name of procedure to be called prior full load, it needs to take exactly one parameter 'table name'",
+          "description": "Name of procedure to be called prior full load.",
           "options": {
             "dependencies": {
               "full_load_mode": "defined_procedure"
             }
           },
           "propertyOrder": 300
+        },
+        "full_load_procedure_parameters": {
+          "type": "string",
+          "format": "textarea",
+          "title": "Full Load Procedure Parameters",
+          "description": "Comma separated list of parameters of procedure to be called prior full load.",
+          "options": {
+            "dependencies": {
+              "full_load_mode": "defined_procedure"
+            }
+          },
+          "propertyOrder": 301
+        }
+      }
+    },
+    "pre_run_script": {
+      "type": "boolean",
+      "title": "Run SQL Script in Oracle before the writer execution",
+      "format": "checkbox",
+      "propertyOrder": 180
+    },
+    "pre_run_scripts": {
+      "title": "Pre run script",
+      "type": "object",
+      "propertyOrder": 185,
+      "options": {
+        "dependencies": {
+          "pre_run_script": true
+        }
+      },
+      "required": [
+        "continue_on_failure",
+        "script"
+      ],
+      "properties": {
+        "continue_on_failure": {
+          "type": "boolean",
+          "format": "checkbox",
+          "title": "Continue on failure",
+          "default": false,
+          "propertyOrder": 1
+        },
+        "script": {
+          "type": "string",
+          "title": "Script",
+          "propertyOrder": 10
+        }
+      }
+    },
+    "post_run_script": {
+      "type": "boolean",
+      "title": "Run SQL Script in Oracle after the writer execution",
+      "format": "checkbox",
+      "propertyOrder": 185
+    },
+    "post_run_scripts": {
+      "title": "Post run script",
+      "type": "object",
+      "propertyOrder": 186,
+      "options": {
+        "dependencies": {
+          "post_run_script": true
+        }
+      },
+      "required": [
+        "continue_on_failure",
+        "script"
+      ],
+      "properties": {
+        "continue_on_failure": {
+          "type": "boolean",
+          "format": "checkbox",
+          "title": "Continue on failure",
+          "default": false,
+          "propertyOrder": 1
+        },
+        "script": {
+          "type": "string",
+          "title": "Script",
+          "propertyOrder": 10
         }
       }
     },
@@ -98,26 +198,6 @@
             "type": "string",
             "title": "Destination Column",
             "propertyOrder": 100
-          },
-          "type": {
-            "type": "string",
-            "title": "Type",
-            "propertyOrder": 200
-          },
-          "nullable": {
-            "type": "boolean",
-            "title": "Nullable",
-            "propertyOrder": 300
-          },
-          "default": {
-            "type": "string",
-            "title": "Default",
-            "propertyOrder": 400
-          },
-          "size": {
-            "type": "string",
-            "title": "Size",
-            "propertyOrder": 500
           }
         }
       },

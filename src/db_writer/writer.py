@@ -180,10 +180,12 @@ class OracleWriter:
         self.log_folder = log_folder
         self._batch_size = load_batch_size
         self.trace_enabled = db_trace_enabled
+        self._ext_session_id = ''
 
-    def connect(self):
+    def connect(self, ext_session_id: str = ''):
         self._logger.debug("Connecting to database.")
         self._connection.connect()
+        self._ext_session_id = ext_session_id
         if self.trace_enabled:
             self._enable_db_trace()
             self._logger.debug(f"DB Trace enabled and outputting to: {self.get_trace_file_path()}")
@@ -261,8 +263,12 @@ class OracleWriter:
 
         return logger
 
+    def execute_script(self, script: str, continue_on_failure: bool = False):
+        res = self._connection.perform_query(script)
+        return list(res)
+
     def upload_full(self, data_path: str, schema: str, table_name: str, columns: List[str],
-                    pre_procedure: Optional[str] = None, pre_procedure_parameters: Optional[dict] = None):
+                    pre_procedure: Optional[str] = None, pre_procedure_parameters: Optional[list] = None):
 
         sql_loader_mode = 'REPLACE'
         if pre_procedure:
@@ -275,7 +281,8 @@ class OracleWriter:
                                    mode=sql_loader_mode)
 
     def upload_incremental(self, data_path: str, schema: str, table_name: str, columns: List[str],
-                           primary_key: Optional[List[str]] = None):
+                           primary_key: Optional[List[str]] = None,
+                           method: Literal['query', 'sqlldr'] = 'sqlldr'):
         """
         Perform upsert or append if no primary key is defined.
 
@@ -285,6 +292,7 @@ class OracleWriter:
             table_name:
             columns:
             primary_key:
+            method: Literal['query', 'sqlldr']: data load method
 
         Returns:
 
@@ -296,7 +304,13 @@ class OracleWriter:
         target_table_name = self._build_table_identifier(schema, table_name)
         if primary_key:
             # upsert mode
-            self._perform_upsert(data_path, table_name, target_table_name, columns, primary_key, table_metadata)
+            try:
+                self._perform_upsert(data_path, table_name, target_table_name, columns, primary_key, table_metadata,
+                                     method=method)
+            except Exception as e:
+                # always drop temp table
+                self._drop_temp_table(table_name)
+                raise e
         else:
             # append mode
             self._load_data_into_table(data_path, schema, table_name, columns, mode='APPEND')
@@ -309,10 +323,11 @@ class OracleWriter:
         return target_table_name
 
     def _perform_upsert(self, data_path: str, table_name: str, target_table_name: str,
-                        columns: List[str], primary_key: List[str], table_metadata: TableSchema):
+                        columns: List[str], primary_key: List[str], table_metadata: TableSchema,
+                        method: Literal['query', 'sqlldr']):
         temp_table_name = self._create_temp_table(table_name, table_metadata.columns)
 
-        self._load_data_into_table(data_path, None, temp_table_name, columns, method='sqlldr')
+        self._load_data_into_table(data_path, None, temp_table_name, columns, method=method)
 
         escape = self._connection.escape
         join_clause = ' AND '.join([f'a.{escape(col)}=b.{escape(col)}' for col in primary_key])
@@ -329,20 +344,25 @@ class OracleWriter:
                                     WHEN NOT MATCHED THEN INSERT ({insert_clause}) VALUES ({insert_values_clause})
                                     """
 
-        self._connection.perform_query(merge_query)
-
+        res = self._connection.perform_query(merge_query)
+        list(res)
         # TODO: Is it necessary to commit, if so when?
         self._logger.debug("Executing Commit")
         self._connection.connection.commit()
+
+        drop_query = f"DROP TABLE {temp_table_name}"
+        self._logger.info("Removing temporary table")
+        res = self._connection.perform_query(drop_query)
+        list(res)
 
     def _create_temp_table(self, table_name: str, columns: List[ColumnSchema]) -> str:
 
         column_signatures = [f'{self._connection.escape(col.name)} {col.source_type_signature}' for col in columns]
 
-        temp_table_name = f'TMP_{table_name.upper()}'
-        query = f"""CREATE GLOBAL TEMPORARY TABLE {temp_table_name}
+        temp_table_name = self._get_temp_table_name(table_name)
+        query = f"""CREATE TABLE {temp_table_name}
                     ({', '.join(column_signatures)})
-                  ON COMMIT PRESERVE ROWS
+                  ON COMMIT DELETE ROWS
         """
         self._logger.debug("Creating temporary table.")
         try:
@@ -356,6 +376,28 @@ class OracleWriter:
             else:
                 raise e
 
+        return temp_table_name
+
+    def _drop_temp_table(self, table_name: str) -> str:
+
+        temp_table_name = self._get_temp_table_name(table_name)
+        query = f"DROP TABLE {temp_table_name}"
+        self._logger.debug("Dropping temporary table.")
+        try:
+            res = self._connection.perform_query(query)
+            # just trigger the results
+            list(res)
+        except WriterUserException as e:
+            if e.db_error.full_code == 'ORA-00955':
+                # table already exists error skipped
+                self._logger.debug(f"Temporary table {temp_table_name} already exists!")
+            else:
+                raise e
+
+        return temp_table_name
+
+    def _get_temp_table_name(self, table_name):
+        temp_table_name = f'KBC_TMP_{self._ext_session_id}_{table_name.upper()}'
         return temp_table_name
 
     def _load_data_into_table(self, data_path: str, schema: str | None, table_name: str, columns: List[str],
