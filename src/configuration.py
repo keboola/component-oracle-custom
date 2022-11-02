@@ -78,6 +78,12 @@ class LoadingOptions(ConfigurationBase):
 
 
 @dataclass
+class ColumnMapping(ConfigurationBase):
+    source_name: str
+    destination_name: str
+
+
+@dataclass
 class Configuration(ConfigurationBase):
     # Connection options
     db: DbOptions
@@ -89,4 +95,5 @@ class Configuration(ConfigurationBase):
     pre_run_script: bool = False
     pre_run_scripts: Optional[Script] = None
     custom_column_mapping: bool = False
+    columns: List[ColumnMapping] = None
     debug: bool = False

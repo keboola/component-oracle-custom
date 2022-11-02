@@ -4,6 +4,7 @@ Template Component main class.
 """
 import logging
 import os
+from typing import List
 
 from keboola.component.base import ComponentBase
 from keboola.component.exceptions import UserException
@@ -47,6 +48,8 @@ class Component(ComponentBase):
         loading_options = self._configuration.loading_options
         load_type = loading_options.load_type
 
+        columns = self._map_columns(input_table.columns)
+
         if self._configuration.pre_run_scripts and self._configuration.pre_run_scripts.script:
             logging.info(f"Pre script detected, running: {self._configuration.pre_run_scripts.script}")
             self._oracle_writer.execute_script(self._configuration.pre_run_scripts.script,
@@ -58,14 +61,14 @@ class Component(ComponentBase):
             self._oracle_writer.upload_full(input_table.full_path,
                                             schema=self._configuration.schema,
                                             table_name=self._configuration.table_name,
-                                            columns=input_table.columns,
+                                            columns=columns,
                                             pre_procedure=pre_procedure,
                                             pre_procedure_parameters=pre_procedure_params)
         elif load_type == 'incremental':
             self._oracle_writer.upload_incremental(input_table.full_path,
                                                    schema=self._configuration.schema,
                                                    table_name=self._configuration.table_name,
-                                                   columns=input_table.columns,
+                                                   columns=columns,
                                                    primary_key=input_table.primary_key,
                                                    method=loading_options.incremental_load_mode
                                                    )
@@ -102,6 +105,23 @@ class Component(ComponentBase):
                                            sql_loader_path=sql_loader_path,
                                            verbose_logging=self._configuration.debug)
         self._oracle_writer.connect(ext_session_id=self.environment_variables.run_id)
+
+    def _map_columns(self, columns: List[str]) -> List[str]:
+        if not self._configuration.columns:
+            return columns
+
+        invalid_mapping: List[str] = list()
+        for mapping in self._configuration.columns:
+            if mapping.source_name not in columns:
+                invalid_mapping.append(mapping.source_name)
+
+            idx = columns.index(mapping.source_name)
+            columns[idx] = mapping.destination_name
+
+        if invalid_mapping:
+            raise UserException(f"Some source column names in mapping do not exist in the source table: "
+                                f"{invalid_mapping}")
+        return columns
 
 
 """
