@@ -10,22 +10,21 @@
       "title": "Authorization",
       "required": [
         "#password",
-        "host",
-        "port",
+        "host_port",
         "user",
         "database"
       ],
       "properties": {
-        "host": {
+        "host_port": {
           "type": "string",
-          "title": "Host",
+          "title": "Hostname/Port",
+          "enum": [
+            "10.254.0.12:16210",
+            "10.254.0.12:16211",
+            "10.254.0.12:15210",
+            "10.254.0.12:15211"
+          ],
           "propertyOrder": 100
-        },
-        "port": {
-          "type": "number",
-          "title": "Port",
-          "default": 1521,
-          "propertyOrder": 200
         },
         "database": {
           "type": "string",

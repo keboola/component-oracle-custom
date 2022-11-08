@@ -40,6 +40,7 @@ class Component(ComponentBase):
         """
         self._init_loggers()
         self._init_configuration()
+        self._validate_host_names()
         self._init_writer_client()
 
         if not self.get_input_tables_definitions():
@@ -77,6 +78,17 @@ class Component(ComponentBase):
             logging.info(f"Post script detected, running: {self._configuration.post_run_scripts.script}")
             self._oracle_writer.execute_script(self._configuration.post_run_scripts.script,
                                                self._configuration.post_run_scripts.continue_on_failure)
+
+    def _validate_host_names(self):
+        approved_hostnames = self.configuration.image_parameters.get("approved_hostnames")
+        host = self._configuration.db.host
+        port = self._configuration.db.port
+        if approved_hostnames:
+            valid_host = any([(host == h['host'] and str(port) == str(h['port']))
+                              for h in approved_hostnames])
+
+            if not valid_host:
+                raise UserException(f'Hostname "{host}" with port "{port}" is not approved.')
 
     def _init_loggers(self):
         class DebugFilter(logging.Filter):

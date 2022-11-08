@@ -48,11 +48,18 @@ class ConfigurationBase:
 
 @dataclass
 class DbOptions(ConfigurationBase):
-    host: str
+    host_port: str
     database: str
     user: str
     pswd_password: str
-    port: int = 1521
+
+    @property
+    def host(self) -> str:
+        return self.host_port.split(':')[0]
+
+    @property
+    def port(self) -> int:
+        return int(self.host_port.split(':')[1])
 
 
 @dataclass
