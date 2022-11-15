@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Iterable, Optional, Literal, Tuple
 
 import oracledb
+from oracledb import DatabaseError
 
 from db_common.db_connection import DbConnection
 from db_writer.sql_loader import SQLLoaderExecutor
@@ -184,7 +185,11 @@ class OracleWriter:
 
     def connect(self, ext_session_id: str = ''):
         self._logger.debug("Connecting to database.")
-        self._connection.connect()
+        try:
+            self._connection.connect()
+        except DatabaseError as e:
+            raise WriterUserException(f"Login to database failed, please check your credentials. Detail: {e}") from e
+
         self._ext_session_id = ext_session_id
         if self.trace_enabled:
             self._enable_db_trace()

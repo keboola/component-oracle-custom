@@ -11,7 +11,7 @@ from keboola.component.exceptions import UserException
 
 # configuration variables
 import configuration
-from db_writer.writer import OracleWriter, OracleCredentials
+from db_writer.writer import OracleWriter, OracleCredentials, WriterUserException
 
 INSTA_CLIENT_PATH = os.environ.get('ORACLE_INSTANT_CLI_PATH', '/usr/local/instantclient_21_8')
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
         comp = Component()
         # this triggers the run method by default and is controlled by the configuration.action parameter
         comp.execute_action()
-    except UserException as exc:
+    except UserException | WriterUserException as exc:
         logging.exception(exc)
         exit(1)
     except Exception as exc:
