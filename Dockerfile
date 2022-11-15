@@ -37,9 +37,14 @@ RUN ln -s /usr/local/instantclient_21_8 /usr/local/instantclient
 RUN ln -s /usr/local/instantclient/sqldr /usr/local/instantclient/sqldr
 RUN ln -s /usr/local/instantclient/sqlplus /usr/bin/sqlplus
 
+# https://stackoverflow.com/questions/48527958/docker-error-getting-username-from-password-database
+RUN useradd -u 1000 kbc_dummy
+
 # https://stackoverflow.com/questions/66922967/problems-connecting-oracledb-from-aws-lambda-using-python-38#comment118302837_66922967
 ENV LD_LIBRARY_PATH=/usr/local/instantclient
 ENV PATH=/usr/local/instantclient:$PATH
+
+
 
 WORKDIR /code/
 
