@@ -113,7 +113,7 @@ class Component(ComponentBase):
                                         insta_client_path=INSTA_CLIENT_PATH,
                                         host=db_config.host, port=db_config.port, service_name=db_config.database)
         sql_loader_path = SQLLDR_PATH
-        self._oracle_writer = OracleWriter(credentials, log_folder='./temp/log',
+        self._oracle_writer = OracleWriter(credentials, log_folder='/tmp/log',
                                            sql_loader_path=sql_loader_path,
                                            verbose_logging=self._configuration.debug)
         self._oracle_writer.connect(ext_session_id=self.environment_variables.run_id)
