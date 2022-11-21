@@ -149,7 +149,7 @@ if __name__ == "__main__":
         detail = ''
         if len(exc.args) > 1:
             detail = exc.args[1]
-        logging.exception(exc, extra={"full_message": detail})
+        logging.exception(exc, extra={"additional_detail": detail})
         exit(1)
     except Exception as exc:
         logging.exception(exc)
