@@ -148,7 +148,8 @@ if __name__ == "__main__":
     except (UserException, WriterUserException, SQLLoaderException) as exc:
         detail = ''
         if len(exc.args) > 1:
-            detail = exc.args[1]
+            # remove extra argument to make logging.exception log properly
+            detail = exc.args.pop(1)
         logging.exception(exc, extra={"additional_detail": detail})
         exit(1)
     except Exception as exc:
