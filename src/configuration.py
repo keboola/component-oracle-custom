@@ -85,6 +85,13 @@ class LoadingOptions(ConfigurationBase):
 
 
 @dataclass
+class SQLLoaderOptions(ConfigurationBase):
+    rows: int = 5000
+    bindsize: int = 8000000
+    readsize: int = 8000001
+
+
+@dataclass
 class ColumnMapping(ConfigurationBase):
     source_name: str
     destination_name: str
@@ -97,6 +104,7 @@ class Configuration(ConfigurationBase):
     schema: str
     table_name: str
     loading_options: LoadingOptions
+    sql_loader_options: Optional[SQLLoaderOptions] = None
     post_run_script: bool = False
     post_run_scripts: Optional[Script] = None
     pre_run_script: bool = False
@@ -104,3 +112,7 @@ class Configuration(ConfigurationBase):
     custom_column_mapping: bool = False
     columns: List[ColumnMapping] = None
     debug: bool = False
+
+    def __post_init__(self):
+        if not self.sql_loader_options:
+            self.sql_loader_options = SQLLoaderOptions()

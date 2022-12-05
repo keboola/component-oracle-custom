@@ -18,8 +18,8 @@ class CTLFileBuilder:
         return f'load data into table {table_name}'
 
     @staticmethod
-    def _fields_terminated_by(terminator: str):
-        return f'fields terminated by "{terminator}"'
+    def _fields_terminated_by(terminator: str, enclosure: str = '\\"'):
+        return f'fields terminated by "{terminator}" OPTIONALLY ENCLOSED BY "{enclosure}"'
 
     @staticmethod
     def _column_list(columns: List[str]):
@@ -158,7 +158,7 @@ class SQLLoaderExecutor:
         self._prepare_log_folder()
         ctl_file = CTLFileBuilder.build(table_name, columns, mode, field_delimiter)
         skip = 1 if skip_first_line else 0
-
+        logging.debug(f"Sqlldr control file: {open(ctl_file, 'r').read()}")
         parameters = {
             "userid": self._uid_string,
             "control": ctl_file,
@@ -168,7 +168,6 @@ class SQLLoaderExecutor:
             "errors": errors,
             "rows": rows,
             "skip": skip,
-            "readsize": bindsize + 1,
             "bindsize": bindsize
         }
 
@@ -195,9 +194,11 @@ class SQLLoaderExecutor:
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        logging.debug(f'Running SQL loader command: {args}', extra={'full_message': stdout})
+        logging.debug(f'Running SQL loader command: {args}', extra={'additional_detail': stdout})
         process.poll()
         if process.poll() != 0:
-            raise SQLLoaderException('Failed to execute the SQL*Loader script. Log in event detail.', stderr)
+            full_log = open(self.log_file_path, 'r').read()
+            raise SQLLoaderException(f'Failed to execute the SQL*Loader script. Log in event detail. {stderr}',
+                                     full_log)
         elif stderr:
             logging.warning(stderr)

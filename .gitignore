@@ -10,7 +10,7 @@ __pycache__/
 src/test.py
 src/temp
 /temp
-
+/oracle_drv
 # kbc datafolder
 /data
 /venv

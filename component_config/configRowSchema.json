@@ -92,6 +92,54 @@
             }
           },
           "propertyOrder": 301
+        },
+        "mode": {
+          "type": "string",
+          "description": "Helper dummy element to render sql_loader_options",
+          "template": "{{full}}-{{incr}}",
+          "watch": {
+            "full": "loading_options.full_load_mode",
+            "incr": "loading_options.incremental_load_mode"
+          },
+          "options": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "sql_loader_options": {
+      "title": "SQL*Loader parameters",
+      "type": "object",
+      "propertyOrder": 155,
+      "options": {
+        "dependencies": {
+          "loading_options.mode": [
+            "undefined-sql_loader",
+            "truncate_as_delete-undefined"
+          ]
+        }
+      },
+      "properties": {
+        "rows": {
+          "type": "number",
+          "description": "Number of rows in conventional path bind array or between direct path data saves",
+          "title": "rows",
+          "default": 5000,
+          "propertyOrder": 10
+        },
+        "bindsize": {
+          "type": "number",
+          "description": "size of conventional path bind array in bytes",
+          "title": "bindsize",
+          "default": 8000000,
+          "propertyOrder": 10
+        },
+        "readsize": {
+          "type": "number",
+          "description": "size of read buffer",
+          "title": "readsize",
+          "default": 8000001,
+          "propertyOrder": 10
         }
       }
     },
