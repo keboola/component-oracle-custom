@@ -116,6 +116,7 @@ class Component(ComponentBase):
         sql_loader_path = SQLLDR_PATH
         self._oracle_writer = OracleWriter(credentials, log_folder=self.files_out_path,
                                            sql_loader_path=sql_loader_path,
+                                           sql_loader_options=self._configuration.sql_loader_options,
                                            verbose_logging=self._configuration.debug)
         self._oracle_writer.connect(ext_session_id=self.environment_variables.run_id)
 
@@ -149,7 +150,8 @@ if __name__ == "__main__":
         detail = ''
         if len(exc.args) > 1:
             # remove extra argument to make logging.exception log properly
-            detail = exc.args.pop(1)
+            detail = exc.args[1]
+            exc.args = exc.args[:1]
         logging.exception(exc, extra={"additional_detail": detail})
         exit(1)
     except Exception as exc:

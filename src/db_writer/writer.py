@@ -9,6 +9,7 @@ from typing import List, Iterable, Optional, Literal, Tuple
 import oracledb
 from oracledb import DatabaseError
 
+from configuration import SQLLoaderOptions
 from db_common.db_connection import DbConnection
 from db_writer.sql_loader import SQLLoaderExecutor
 from db_writer.table_schema import TableSchema, ColumnSchema
@@ -166,13 +167,16 @@ class WriterUserException(Exception):
 class OracleWriter:
 
     def __init__(self, oracle_credentials: OracleCredentials, log_folder: str,
+                 sql_loader_options: SQLLoaderOptions,
                  sql_loader_path: str = 'sqlldr',
-                 load_batch_size: int = 5000, verbose_logging: bool = False, db_trace_enabled=False):
+                 load_batch_size: int = 5000,
+                 verbose_logging: bool = False, db_trace_enabled=False):
         self.__credentials = oracle_credentials
         self._logger = self._set_logger(log_folder, verbose_logging)
         self._connection = OracleConnection(**asdict(self.__credentials),
                                             logger=__name__)
         self._metadata_provider = OracleMetadataProvider(self._connection)
+        self._sql_loader_options = sql_loader_options
         self._sql_loader = SQLLoaderExecutor(self._connection.dsn,
                                              oracle_credentials.username,
                                              oracle_credentials.password,
@@ -410,7 +414,8 @@ class OracleWriter:
         if method == 'sqlldr':
             self._logger.info(f"Running load mode: {method}")
             table_identifier = self._build_table_identifier(schema, table_name)
-            self._sql_loader.load_data(data_path, table_identifier, columns, mode=mode, errors=0)
+            self._sql_loader.load_data(data_path, table_identifier, columns, mode=mode, errors=0,
+                                       **asdict(self._sql_loader_options))
         elif method == 'query':
             self._logger.info(f"Running load mode: '{method}'")
             self._insert_records_query(data_path, schema, table_name, columns)
