@@ -41,7 +41,7 @@
           "default": "truncate_as_delete",
           "options": {
             "enum_titles": [
-              "Defined Procedure",
+              "Defined Procedure (SQL*Loader INSERT)",
               "SQL*Loader - REPLACE (DELETE)"
             ],
             "dependencies": {
@@ -115,7 +115,8 @@
         "dependencies": {
           "loading_options.mode": [
             "undefined-sql_loader",
-            "truncate_as_delete-undefined"
+            "truncate_as_delete-undefined",
+            "defined_procedure-undefined"
           ]
         }
       },
