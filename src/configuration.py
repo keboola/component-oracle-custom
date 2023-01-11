@@ -75,6 +75,7 @@ class LoadingOptions(ConfigurationBase):
     incremental_load_mode: Optional[str] = 'sql_loader'
     full_load_procedure: Optional[str] = None
     full_load_procedure_parameters: Optional[str] = None
+    mode: Optional[str] = None
 
     @property
     def full_load_procedure_parameters_list(self):
