@@ -1,0 +1,3 @@
+[2023-01-17 11:38:25,940]:  Connecting to database.
+[2023-01-17 11:38:31,181]:  Inserting data in full mode using SQL*Loader, mode: REPLACE
+[2023-01-17 11:38:31,182]:  Running load mode: sqlldr

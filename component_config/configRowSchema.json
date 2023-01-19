@@ -17,6 +17,25 @@
       "title": "Destination table name",
       "propertyOrder": 102
     },
+    "default_format_options": {
+      "title": "Default Format (NLS)",
+      "type": "object",
+      "propertyOrder": 103,
+      "properties": {
+        "date_format": {
+          "type": "string",
+          "title": "DATE format mask",
+          "default": "YYYY-MM-DD",
+          "propertyOrder": 10
+        },
+        "timestamp_format": {
+          "type": "string",
+          "title": "DATE format mask",
+          "default": "YYYY-MM-DD HH24:MI:SS.FF6",
+          "propertyOrder": 10
+        }
+      }
+    },
     "loading_options": {
       "type": "object",
       "propertyOrder": 150,
@@ -60,6 +79,10 @@
           "required": true,
           "default": "sql_loader",
           "options": {
+            "enum_titles": [
+              "SQL*Loader (Append Only)",
+              "Query (Upsert)"
+            ],
             "dependencies": {
               "load_type": "incremental"
             }

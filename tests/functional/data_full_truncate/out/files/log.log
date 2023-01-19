@@ -1,0 +1,60 @@
+
+SQL*Loader: Release 19.0.0.0.0 - Production on Tue Jan 17 11:24:45 2023
+Version 19.8.0.0.0
+
+Copyright (c) 1982, 2020, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   /var/folders/cj/gw6t8m4951j9_zw2kf3vc7_c0000gn/T/tmp1x687217sqlldr.ctl
+Data File:      /Users/esner/Documents/Prace/KBC/kds-team.wr-oracle-custom/data/in/tables/test_types.csv
+  Bad File:     /Users/esner/Documents/Prace/KBC/kds-team.wr-oracle-custom/data/out/files/bad.log
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 1
+Errors allowed: 0
+Bind array:     6000 rows, maximum of 8000000 bytes
+Continuation:    none specified
+Path used:      Conventional
+
+Table "SYSTEM"."TEST_DATA", loaded from every logical record.
+Insert option in effect for this table: REPLACE
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+COL_DECIMAL                         FIRST     *   ,  O(") CHARACTER            
+COL_FLOAT                            NEXT     *   ,  O(") CHARACTER            
+COL_INTEGER                          NEXT     *   ,  O(") CHARACTER            
+COL_DATE                             NEXT     *   ,  O(") CHARACTER            
+COL_VARCHAR                          NEXT     *   ,  O(") CHARACTER            
+COL_CHAR                             NEXT     *   ,  O(") CHARACTER            
+COL_DATETIME                         NEXT     *   ,  O(") CHARACTER            
+
+value used for ROWS parameter changed from 6000 to 4429
+Record 1: Rejected - Error on table "SYSTEM"."TEST_DATA", column COL_DATE.
+ORA-01861: literal does not match format string
+
+
+MAXIMUM ERROR COUNT EXCEEDED - Above statistics reflect partial run.
+
+Table "SYSTEM"."TEST_DATA":
+  0 Rows successfully loaded.
+  1 Row not loaded due to data errors.
+  0 Rows not loaded because all WHEN clauses were failed.
+  0 Rows not loaded because all fields were null.
+
+
+Space allocated for bind array:                7998774 bytes(4429 rows)
+Read   buffer bytes: 8000001
+
+Total logical records skipped:          1
+Total logical records read:             2
+Total logical records rejected:         1
+Total logical records discarded:        0
+
+Run began on Tue Jan 17 11:24:45 2023
+Run ended on Tue Jan 17 11:24:49 2023
+
+Elapsed time was:     00:00:03.22
+CPU time was:         00:00:00.06

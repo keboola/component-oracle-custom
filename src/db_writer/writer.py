@@ -9,7 +9,7 @@ from typing import List, Iterable, Optional, Literal, Tuple
 import oracledb
 from oracledb import DatabaseError
 
-from configuration import SQLLoaderOptions
+from configuration import SQLLoaderOptions, DefaultFormatOptions
 from db_common.db_connection import DbConnection
 from db_writer.sql_loader import SQLLoaderExecutor
 from db_writer.table_schema import TableSchema, ColumnSchema
@@ -113,6 +113,9 @@ class OracleMetadataProvider:
     def __init__(self, connection: DbConnection):
         self.__connection = connection
 
+    NO_LENGTH_DATATYPES = ('DATE', 'LONG', 'TIMESTAMP')
+    NO_PRECISION_DATATYPES = ('FLOAT',)
+
     def get_table_metadata(self, schema: str, table_name: str) -> TableSchema:
         table_schema = TableSchema(table_name, [])
         query = """SELECT COLUMN_NAME, DATA_TYPE, 
@@ -136,9 +139,10 @@ class OracleMetadataProvider:
     @staticmethod
     def _get_column_datatype_signature(dtype, length, precision, nullable) -> str:
         datatype = dtype
-        if length:
+        dtype_stripped = dtype.split('(')[0]
+        if length and dtype_stripped.upper() not in OracleMetadataProvider.NO_LENGTH_DATATYPES:
             datatype += f'({length}'
-            if precision:
+            if precision and dtype_stripped.upper() not in OracleMetadataProvider.NO_PRECISION_DATATYPES:
                 datatype += f',{precision}'
 
             datatype += ')'
@@ -168,6 +172,7 @@ class OracleWriter:
 
     def __init__(self, oracle_credentials: OracleCredentials, log_folder: str,
                  sql_loader_options: SQLLoaderOptions,
+                 default_format: DefaultFormatOptions,
                  sql_loader_path: str = 'sqlldr',
                  load_batch_size: int = 5000,
                  verbose_logging: bool = False, db_trace_enabled=False):
@@ -177,20 +182,25 @@ class OracleWriter:
                                             logger=__name__)
         self._metadata_provider = OracleMetadataProvider(self._connection)
         self._sql_loader_options = sql_loader_options
+
         self._sql_loader = SQLLoaderExecutor(self._connection.dsn,
                                              oracle_credentials.username,
                                              oracle_credentials.password,
+                                             global_format=default_format,
                                              log_folder=log_folder,
                                              sql_loader_path=sql_loader_path)
         self.log_folder = log_folder
         self._batch_size = load_batch_size
         self.trace_enabled = db_trace_enabled
         self._ext_session_id = ''
+        self._default_format = default_format
 
     def connect(self, ext_session_id: str = ''):
         self._logger.debug("Connecting to database.")
         try:
             self._connection.connect()
+            self._logger.info("Setting default NLS session.")
+            self._set_default_session()
         except DatabaseError as e:
             raise WriterUserException(f"Login to database failed, please check your credentials. Detail: {e}") from e
 
@@ -198,6 +208,11 @@ class OracleWriter:
         if self.trace_enabled:
             self._enable_db_trace()
             self._logger.debug(f"DB Trace enabled and outputting to: {self.get_trace_file_path()}")
+
+    def _set_default_session(self):
+        self.execute_script("alter session set NLS_NUMERIC_CHARACTERS = '. '")
+        self.execute_script(f"alter session set NLS_TIMESTAMP_FORMAT = '{self._default_format.timestamp_format}'")
+        self.execute_script(f"alter session set NLS_DATE_FORMAT = '{self._default_format.date_format}'")
 
     def close_connection(self):
         self._logger.debug("Closing the connection.")
@@ -279,6 +294,9 @@ class OracleWriter:
     def upload_full(self, data_path: str, schema: str, table_name: str, columns: List[str],
                     pre_procedure: Optional[str] = None, pre_procedure_parameters: Optional[list] = None):
 
+        table_metadata = self._metadata_provider.get_table_metadata(schema, table_name)
+        self._validate_schema(columns, table_metadata.columns)
+
         sql_loader_mode = 'REPLACE'
         if pre_procedure:
             self._connection.run_procedure(pre_procedure, pre_procedure_parameters)
@@ -286,6 +304,7 @@ class OracleWriter:
             sql_loader_mode = 'INSERT'
         self._logger.info(f"Inserting data in full mode using SQL*Loader, mode: {sql_loader_mode}")
         self._load_data_into_table(data_path, schema, table_name, columns,
+                                   table_metadata.columns,
                                    method='sqlldr',
                                    mode=sql_loader_mode)
 
@@ -311,7 +330,7 @@ class OracleWriter:
 
         self._validate_schema(columns, table_metadata.columns)
         target_table_name = self._build_table_identifier(schema, table_name)
-        if primary_key:
+        if primary_key and method == 'query':
             # upsert mode
             try:
                 self._perform_upsert(data_path, table_name, target_table_name, columns, primary_key, table_metadata,
@@ -322,7 +341,9 @@ class OracleWriter:
                 raise e
         else:
             # append mode
-            self._load_data_into_table(data_path, schema, table_name, columns, mode='APPEND')
+            self._load_data_into_table(data_path, schema, table_name, columns, table_metadata.columns,
+                                       method=method,
+                                       mode='APPEND')
 
     def _build_table_identifier(self, schema: str | None, table_name: str):
         target_table_name = self._connection.escape(table_name)
@@ -371,7 +392,6 @@ class OracleWriter:
         temp_table_name = self._get_temp_table_name(table_name)
         query = f"""CREATE TABLE {temp_table_name}
                     ({', '.join(column_signatures)})
-                  ON COMMIT DELETE ROWS
         """
         self._logger.debug("Creating temporary table.")
         try:
@@ -400,6 +420,9 @@ class OracleWriter:
             if e.db_error.full_code == 'ORA-00955':
                 # table already exists error skipped
                 self._logger.debug(f"Temporary table {temp_table_name} already exists!")
+            elif e.db_error.full_code == 'ORA-00942':
+                # table does not exist error skipped
+                self._logger.debug(f"Temporary table {temp_table_name} does not exist!")
             else:
                 raise e
 
@@ -410,11 +433,16 @@ class OracleWriter:
         return temp_table_name
 
     def _load_data_into_table(self, data_path: str, schema: str | None, table_name: str, columns: List[str],
+                              destination_schema: List[ColumnSchema],
                               method: Literal['sqlldr', 'query'] = 'sqlldr', mode='INSERT'):
+        columns_involved = [col for col in destination_schema if col.name in columns]
+
         if method == 'sqlldr':
             self._logger.info(f"Running load mode: {method}")
             table_identifier = self._build_table_identifier(schema, table_name)
-            self._sql_loader.load_data(data_path, table_identifier, columns, mode=mode, errors=0,
+            columns_types = self._get_sqlldr_types(columns_involved)
+            self._sql_loader.load_data(data_path, table_identifier, columns_types,
+                                       mode=mode, errors=0,
                                        **asdict(self._sql_loader_options))
         elif method == 'query':
             self._logger.info(f"Running load mode: '{method}'")
@@ -456,3 +484,23 @@ class OracleWriter:
             raise WriterUserException(f"The destination schema does not contain specified columns: {mismatched}. "
                                       f"The expected schema is: {expected_names}. "
                                       "Please check the column mapping and case")
+
+    def _get_sqlldr_types(self, columns_involved: List[ColumnSchema]) -> List[Tuple[str, str]]:
+        """
+        Returns column names with SQLLoader type annotations
+        Args:
+            columns_involved:
+
+        Returns:
+
+        """
+        result_typed = list()
+        for c in columns_involved:
+            col_type = c.source_type.split('(')[0]
+            # Use only dates
+            sqlldr_type = ''
+            if col_type.upper() in ['TIMESTAMP', 'DATE']:
+                sqlldr_type = col_type
+            result_typed.append((c.name, sqlldr_type))
+
+        return result_typed

@@ -93,6 +93,12 @@ class SQLLoaderOptions(ConfigurationBase):
 
 
 @dataclass
+class DefaultFormatOptions(ConfigurationBase):
+    date_format: str = 'YYYY-MM-DD'
+    timestamp_format: str = "YYYY-MM-DD HH24:MI:SS.FF6"
+
+
+@dataclass
 class ColumnMapping(ConfigurationBase):
     source_name: str
     destination_name: str
@@ -105,6 +111,7 @@ class Configuration(ConfigurationBase):
     schema: str
     table_name: str
     loading_options: LoadingOptions
+    default_format_options: DefaultFormatOptions
     sql_loader_options: Optional[SQLLoaderOptions] = None
     post_run_script: bool = False
     post_run_scripts: Optional[Script] = None

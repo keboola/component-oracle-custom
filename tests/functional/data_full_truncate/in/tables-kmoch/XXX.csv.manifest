@@ -1,0 +1,27 @@
+{
+    "id": "in.c-vkmoch_test.XXX",
+    "uri": "https:\/\/connection.csas.keboola.cloud\/v2\/storage\/tables\/in.c-vkmoch_test.XXX",
+    "name": "XXX",
+    "primary_key": [],
+    "distribution_key": [],
+    "created": "2022-11-14T16:11:57+0100",
+    "last_change_date": "2022-11-14T09:25:40+0100",
+    "last_import_date": "2022-11-14T09:25:40+0100",
+    "columns": [
+        "COL_DECIMAL",
+        "COL_INTEGER",
+        "COL_DATE",
+        "COL_VARCHAR",
+        "COL_CHAR",
+        "SYS_DATETIME"
+    ],
+    "metadata": [],
+    "column_metadata": {
+        "COL_DECIMAL": [],
+        "COL_INTEGER": [],
+        "COL_DATE": [],
+        "COL_VARCHAR": [],
+        "COL_CHAR": [],
+        "SYS_DATETIME": []
+    }
+}
