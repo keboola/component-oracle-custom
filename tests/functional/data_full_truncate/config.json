@@ -1,0 +1,71 @@
+{
+  "storage": {
+    "input": {
+      "files": [],
+      "tables": [
+        {
+          "source": "in.c-test.test",
+          "destination": "test.csv",
+          "limit": 50,
+          "columns": [],
+          "where_values": [],
+          "where_operator": "eq"
+        }
+      ]
+    },
+    "output": {
+      "files": [],
+      "tables": []
+    }
+  },
+  "parameters": {
+    "db": {
+      "host_port": "localhost:1521",
+      "database": "xe",
+      "user": "system",
+      "#password": "oracle"
+    },
+    "schema": "SYSTEM",
+    "custom_column_mapping": false,
+    "pre_run_script": false,
+    "loading_options": {
+      "load_type": "full_load",
+      "full_load_mode": "truncate_as_delete"
+    },
+    "sql_loader_options": {
+      "rows": 6000,
+      "bindsize": 8000000,
+      "readsize": 8000001
+    },
+    "table_name": "TEST_DATA",
+    "post_run_script": false,
+    "debug": true
+  },
+  "action": "run",
+  "image_parameters": {
+    "approved_hostnames": [
+      {
+        "host": "localhost",
+        "port": "1521"
+      }
+    ]
+  },
+  "authorization": {
+    "oauth_api": {
+      "id": "OAUTH_API_ID",
+      "credentials": {
+        "id": "main",
+        "authorizedFor": "Myself",
+        "creator": {
+          "id": "1234",
+          "description": "me@keboola.com"
+        },
+        "created": "2016-01-31 00:13:30",
+        "#data": "{\"refresh_token\":\"XXXXX-TOKEN\"}",
+        "oauthVersion": "2.0",
+        "appKey": "12345",
+        "#appSecret": "123qwe-CiN"
+      }
+    }
+  }
+}

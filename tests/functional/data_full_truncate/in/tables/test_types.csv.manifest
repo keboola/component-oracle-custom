@@ -1,0 +1,247 @@
+{
+    "id": "out.c-oracle-test-data.test_types",
+    "uri": "https:\/\/connection.csas.keboola.cloud\/v2\/storage\/tables\/out.c-oracle-test-data.test_types",
+    "name": "test_types",
+    "primary_key": [],
+    "distribution_key": [],
+    "created": "2023-01-17T11:14:21+0100",
+    "last_change_date": "2023-01-17T11:14:48+0100",
+    "last_import_date": "2023-01-17T11:14:48+0100",
+    "columns": [
+        "COL_DECIMAL",
+        "COL_FLOAT",
+        "COL_INTEGER",
+        "COL_DATE",
+        "COL_VARCHAR",
+        "COL_CHAR",
+        "COL_DATETIME"
+    ],
+    "metadata": [
+        {
+            "id": "54649637",
+            "key": "KBC.createdBy.component.id",
+            "value": "keboola.synapse-transformation",
+            "provider": "system",
+            "timestamp": "2023-01-17T11:14:49+0100"
+        },
+        {
+            "id": "54649638",
+            "key": "KBC.createdBy.configuration.id",
+            "value": "12947091",
+            "provider": "system",
+            "timestamp": "2023-01-17T11:14:49+0100"
+        },
+        {
+            "id": "54649639",
+            "key": "KBC.lastUpdatedBy.component.id",
+            "value": "keboola.synapse-transformation",
+            "provider": "system",
+            "timestamp": "2023-01-17T11:14:50+0100"
+        },
+        {
+            "id": "54649640",
+            "key": "KBC.lastUpdatedBy.configuration.id",
+            "value": "12947091",
+            "provider": "system",
+            "timestamp": "2023-01-17T11:14:50+0100"
+        }
+    ],
+    "column_metadata": {
+        "COL_DECIMAL": [
+            {
+                "id": "54649641",
+                "key": "KBC.datatype.type",
+                "value": "decimal",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649642",
+                "key": "KBC.datatype.nullable",
+                "value": "1",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649643",
+                "key": "KBC.datatype.basetype",
+                "value": "NUMERIC",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649644",
+                "key": "KBC.datatype.length",
+                "value": "20,5",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            }
+        ],
+        "COL_FLOAT": [
+            {
+                "id": "54649645",
+                "key": "KBC.datatype.type",
+                "value": "float",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649646",
+                "key": "KBC.datatype.nullable",
+                "value": "1",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649647",
+                "key": "KBC.datatype.basetype",
+                "value": "FLOAT",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649648",
+                "key": "KBC.datatype.length",
+                "value": "53",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            }
+        ],
+        "COL_INTEGER": [
+            {
+                "id": "54649649",
+                "key": "KBC.datatype.type",
+                "value": "bigint",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649650",
+                "key": "KBC.datatype.nullable",
+                "value": "1",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649651",
+                "key": "KBC.datatype.basetype",
+                "value": "INTEGER",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            }
+        ],
+        "COL_DATE": [
+            {
+                "id": "54649652",
+                "key": "KBC.datatype.type",
+                "value": "date",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649653",
+                "key": "KBC.datatype.nullable",
+                "value": "1",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649654",
+                "key": "KBC.datatype.basetype",
+                "value": "DATE",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            }
+        ],
+        "COL_VARCHAR": [
+            {
+                "id": "54649655",
+                "key": "KBC.datatype.type",
+                "value": "nvarchar",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649656",
+                "key": "KBC.datatype.nullable",
+                "value": "1",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649657",
+                "key": "KBC.datatype.basetype",
+                "value": "STRING",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649658",
+                "key": "KBC.datatype.length",
+                "value": "256",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            }
+        ],
+        "COL_CHAR": [
+            {
+                "id": "54649659",
+                "key": "KBC.datatype.type",
+                "value": "varchar",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649660",
+                "key": "KBC.datatype.nullable",
+                "value": "",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649661",
+                "key": "KBC.datatype.basetype",
+                "value": "STRING",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649662",
+                "key": "KBC.datatype.length",
+                "value": "1",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            }
+        ],
+        "COL_DATETIME": [
+            {
+                "id": "54649663",
+                "key": "KBC.datatype.type",
+                "value": "datetime2",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649664",
+                "key": "KBC.datatype.nullable",
+                "value": "1",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649665",
+                "key": "KBC.datatype.basetype",
+                "value": "TIMESTAMP",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            },
+            {
+                "id": "54649666",
+                "key": "KBC.datatype.length",
+                "value": "7",
+                "provider": "keboola.synapse-transformation",
+                "timestamp": "2023-01-17T11:14:50+0100"
+            }
+        ]
+    }
+}
