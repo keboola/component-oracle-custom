@@ -476,6 +476,9 @@ class OracleWriter:
                 cursor.executemany(insert_query, buffer)
 
         cursor.close()
+        # TODO: Is it necessary to commit, if so when?
+        self._logger.debug("Executing Commit")
+        self._connection.connection.commit()
 
     def _validate_schema(self, columns: List[str], destination_columns: List[ColumnSchema]):
         expected_names = [col.name for col in destination_columns]

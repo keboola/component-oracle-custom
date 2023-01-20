@@ -16,8 +16,8 @@ class CTLFileBuilder:
     CTLLoadMode = Literal['INSERT', 'TRUNCATE', 'REPLACE']
 
     @staticmethod
-    def _load_data_into(table_name: str):
-        return f'load data into table {table_name}'
+    def _load_data_into(table_name: str, character_set: str = 'UTF8'):
+        return f'load data CHARACTERSET {character_set} into table {table_name}'
 
     @staticmethod
     def _fields_terminated_by(terminator: str, enclosure: str = '\\"'):
