@@ -80,6 +80,8 @@ class Component(ComponentBase):
             self._oracle_writer.execute_script(self._configuration.post_run_scripts.script,
                                                self._configuration.post_run_scripts.continue_on_failure)
 
+        logging.info("Process finished.")
+
     def _validate_host_names(self):
         approved_hostnames = self.configuration.image_parameters.get("approved_hostnames")
         host = self._configuration.db.host
@@ -159,3 +161,4 @@ if __name__ == "__main__":
     except Exception as exc:
         logging.exception(exc)
         exit(2)
+    logging.info("Code execution end")

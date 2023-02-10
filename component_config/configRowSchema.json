@@ -77,7 +77,7 @@
           "type": "string",
           "title": "Mode",
           "required": true,
-          "default": "sql_loader",
+          "default": "sqlldr",
           "options": {
             "enum_titles": [
               "SQL*Loader (Append Only)",
@@ -88,7 +88,7 @@
             }
           },
           "enum": [
-            "sql_loader",
+            "sqlldr",
             "query"
           ],
           "propertyOrder": 150
