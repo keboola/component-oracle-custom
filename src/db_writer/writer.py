@@ -299,6 +299,7 @@ class OracleWriter:
 
         sql_loader_mode = 'REPLACE'
         if pre_procedure:
+            self._logger.info(f"Running PRE procedure '{pre_procedure}' with parameters {pre_procedure_parameters}")
             self._connection.run_procedure(pre_procedure, pre_procedure_parameters)
             # the procedure is expected to empty the table
             sql_loader_mode = 'INSERT'

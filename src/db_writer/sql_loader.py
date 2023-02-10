@@ -221,12 +221,16 @@ class SQLLoaderExecutor:
         process = subprocess.Popen(args,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
+
+        logging.info(f'Running SQL loader command: {args}')
         stdout, stderr = process.communicate()
-        logging.debug(f'Running SQL loader command: {args}', extra={'additional_detail': stdout})
         process.poll()
+
         if process.poll() != 0:
             full_log = open(self.log_file_path, 'r').read()
             raise SQLLoaderException(f'Failed to execute the SQL*Loader script. Log in event detail. {stderr}',
                                      full_log)
         elif stderr:
             logging.warning(stderr)
+
+        logging.info('SQL*Loader command finished', extra={'additional_detail': stdout})
