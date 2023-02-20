@@ -6,7 +6,7 @@ import logging
 import os
 from typing import List
 
-from keboola.component.base import ComponentBase
+from keboola.component.base import ComponentBase, sync_action
 from keboola.component.exceptions import UserException
 
 # configuration variables
@@ -140,6 +140,13 @@ class Component(ComponentBase):
             raise UserException(f"Some source column names in mapping do not exist in the source table: "
                                 f"{invalid_mapping}")
         return columns
+
+    @sync_action('load_table_columns')
+    def load_available_columns(self):
+        if not self.get_input_tables_definitions():
+            raise UserException("No input table specified. Please provide one input table in the input mapping!")
+        input_table = self.get_input_tables_definitions()[0]
+        return [{"value": c, "label": c} for c in input_table.columns]
 
 
 """
