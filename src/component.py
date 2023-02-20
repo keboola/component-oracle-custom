@@ -143,9 +143,9 @@ class Component(ComponentBase):
 
     @sync_action('load_table_columns')
     def load_available_columns(self):
-        if not self.get_input_tables_definitions():
+        if not self.configuration.tables_input_mapping():
             raise UserException("No input table specified. Please provide one input table in the input mapping!")
-        input_table = self.get_input_tables_definitions()[0]
+        input_table = self.configuration.tables_input_mapping[0]
         return [{"value": c, "label": c} for c in input_table.columns]
 
 
