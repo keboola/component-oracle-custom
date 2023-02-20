@@ -42,6 +42,10 @@ class OracleConnection(DbConnection):
     def escape(identifier: str) -> str:
         return f'"{identifier.upper()}"'
 
+    def test_connection(self) -> None:
+        self.connect()
+        self.__connection.close()
+
     def connect(self) -> None:
         # You must always call init_oracle_client() to use thick mode in any platform
         oracledb.init_oracle_client(lib_dir=self._insta_client_path)
@@ -208,6 +212,10 @@ class OracleWriter:
         if self.trace_enabled:
             self._enable_db_trace()
             self._logger.debug(f"DB Trace enabled and outputting to: {self.get_trace_file_path()}")
+
+    def test_connection(self):
+        self.connect()
+        self.close_connection()
 
     def _set_default_session(self):
         self.execute_script("alter session set NLS_NUMERIC_CHARACTERS = '. '")
