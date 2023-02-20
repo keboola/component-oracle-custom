@@ -42,7 +42,8 @@
           "format": "password",
           "propertyOrder": 500
         }
-      }
+      },
+      "propertyOrder": 1
     },
     "test_connection": {
       "type": "button",
