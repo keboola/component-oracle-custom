@@ -4,6 +4,7 @@ Template Component main class.
 """
 import logging
 import os
+from dataclasses import asdict
 from typing import List
 
 from keboola.component.base import ComponentBase, sync_action
@@ -12,7 +13,7 @@ from keboola.component.exceptions import UserException
 # configuration variables
 import configuration
 from db_writer.sql_loader import SQLLoaderException
-from db_writer.writer import OracleWriter, OracleCredentials, WriterUserException
+from db_writer.writer import OracleWriter, OracleCredentials, WriterUserException, OracleConnection
 
 INSTA_CLIENT_PATH = os.environ.get('ORACLE_INSTANT_CLI_PATH', '/usr/local/instantclient_21_8')
 
@@ -108,13 +109,19 @@ class Component(ComponentBase):
         self._configuration: configuration.Configuration = configuration.Configuration.load_from_dict(
             self.configuration.parameters)
 
-    def _init_writer_client(self):
+    def _get_oracle_credentials(self) -> OracleCredentials:
+        db_json = self.configuration.parameters.get('db', {})
+        self._validate_parameters(db_json, configuration.DbOptions.get_dataclass_required_parameters(), 'Credentials')
         # build credentials
-        db_config = self._configuration.db
-        credentials = OracleCredentials(username=db_config.user,
-                                        password=db_config.pswd_password,
-                                        insta_client_path=INSTA_CLIENT_PATH,
-                                        host=db_config.host, port=db_config.port, service_name=db_config.database)
+        db_config = configuration.DbOptions.load_from_dict(db_json)
+
+        return OracleCredentials(username=db_config.user,
+                                 password=db_config.pswd_password,
+                                 insta_client_path=INSTA_CLIENT_PATH,
+                                 host=db_config.host, port=db_config.port, service_name=db_config.database)
+
+    def _init_writer_client(self):
+        credentials = self._get_oracle_credentials()
         sql_loader_path = SQLLDR_PATH
         self._oracle_writer = OracleWriter(credentials,
                                            default_format=self._configuration.default_format_options,
@@ -147,6 +154,13 @@ class Component(ComponentBase):
             raise UserException("No input table specified. Please provide one input table in the input mapping!")
         input_table = self.configuration.tables_input_mapping[0]
         return [{"value": c, "label": c} for c in input_table.columns]
+
+    @sync_action('testConnection')
+    def test_connection(self):
+        credentials = self._get_oracle_credentials()
+        connection = OracleConnection(**asdict(credentials),
+                                      logger=__name__)
+        connection.test_connection()
 
 
 """
