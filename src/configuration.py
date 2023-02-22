@@ -20,8 +20,8 @@ class ConfigurationBase:
         else:
             return value
 
-    @staticmethod
-    def load_from_dict(configuration: dict):
+    @classmethod
+    def load_from_dict(cls, configuration: dict):
         """
         Initialize the configuration dataclass object from dictionary.
         Args:
@@ -32,7 +32,7 @@ class ConfigurationBase:
         """
         json_conf = json.dumps(configuration)
         json_conf = ConfigurationBase._convert_private_value(json_conf)
-        return dataconf.loads(json_conf, Configuration)
+        return dataconf.loads(json_conf, cls, ignore_unexpected=True)
 
     @classmethod
     def get_dataclass_required_parameters(cls) -> List[str]:
