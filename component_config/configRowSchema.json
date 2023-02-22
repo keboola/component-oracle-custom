@@ -260,15 +260,7 @@
           "source_name": {
             "type": "string",
             "title": "Source Column",
-            "propertyOrder": 1,
-            "format": "select",
-            "enum": [],
-            "options": {
-              "async": {
-                "label": "Load available columns",
-                "action": "load_table_columns"
-              }
-            }
+            "propertyOrder": 1
           },
           "destination_name": {
             "type": "string",
