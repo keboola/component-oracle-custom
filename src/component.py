@@ -183,3 +183,4 @@ if __name__ == "__main__":
         logging.exception(exc)
         exit(2)
     logging.info("Code execution end")
+    exit(1)
