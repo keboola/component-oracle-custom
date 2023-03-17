@@ -366,7 +366,7 @@ class OracleWriter:
                         method: Literal['query', 'sqlldr']):
         temp_table_name = self._create_temp_table(table_name, table_metadata.columns)
 
-        self._load_data_into_table(data_path, None, temp_table_name, columns, method=method)
+        self._load_data_into_table(data_path, None, temp_table_name, columns, table_metadata.columns, method=method)
 
         escape = self._connection.escape
         join_clause = ' AND '.join([f'a.{escape(col)}=b.{escape(col)}' for col in primary_key])
