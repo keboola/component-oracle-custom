@@ -88,7 +88,8 @@ class Component(ComponentBase):
         host = self._configuration.db.host
         port = self._configuration.db.port
         if approved_hostnames:
-            valid_host = f'{host}:{port}' in approved_hostnames
+            valid_host = any([(host == h['host'] and str(port) == str(h['port']))
+                              for h in approved_hostnames])
             if not valid_host:
                 raise UserException(f'Hostname "{host}" with port "{port}" is not approved.')
 
