@@ -21,7 +21,7 @@ class CTLFileBuilder:
 
     @staticmethod
     def _fields_terminated_by(terminator: str, enclosure: str = '\\"'):
-        return f'fields terminated by "{terminator}" OPTIONALLY ENCLOSED BY "{enclosure}"'
+        return f'FIELDS CSV WITH EMBEDDED TERMINATED BY "{terminator}" OPTIONALLY ENCLOSED BY "{enclosure}"'
 
     @staticmethod
     def _column_list(columns: List[Tuple[str, str]]):
