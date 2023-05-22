@@ -513,6 +513,8 @@ class OracleWriter:
             sqlldr_type = ''
             if col_type.upper() in ['TIMESTAMP', 'DATE']:
                 sqlldr_type = col_type
+            if 'CHAR' in col_type.upper():
+                sqlldr_type = f'CHAR({c.length})'
             result_typed.append((c.name, sqlldr_type))
 
         return result_typed
