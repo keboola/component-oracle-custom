@@ -444,7 +444,9 @@ class OracleWriter:
     def _load_data_into_table(self, data_path: str, schema: str | None, table_name: str, columns: List[str],
                               destination_schema: List[ColumnSchema],
                               method: Literal['sqlldr', 'query'] = 'sqlldr', mode='INSERT'):
-        columns_involved = [col for col in destination_schema if col.name in columns]
+        # important to order by CSV column order
+        indexed_schema = {col.name: col for col in destination_schema}
+        columns_involved = [indexed_schema[col] for col in columns]
 
         if method == 'sqlldr':
             self._logger.info(f"Running load mode: {method}")
