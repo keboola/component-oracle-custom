@@ -76,6 +76,8 @@ class CTLFileBuilder:
                 out.write('\n')
                 out.write(cls._timestamp_default_format(default_format.timestamp_format))
                 out.write('\n')
+            out.write('TRAILING NULLCOLS')
+            out.write('\n')
             out.write(cls._column_list(columns))
 
         return Path(ctl_path)
