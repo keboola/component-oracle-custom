@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.13-slim
 ENV PYTHONIOENCODING utf-8
 
 COPY /src /code/src/
@@ -22,7 +22,12 @@ RUN wget -O /tmp/instantclient-tools-linux.x64-21.8.0.0.0dbru.zip https://downlo
 
 
 RUN apt-get update -q \
- && apt-get install -y unzip ssh libmcrypt-dev libaio1 wget --no-install-recommends
+ && apt-get install -y unzip ssh libmcrypt-dev libaio1t64 wget --no-install-recommends
+
+# Create symbolic link for libaio compatibility
+# Oracle Instant Client expects libaio.so.1 but libaio1t64 provides libaio.so.1t64
+# This link ensures Oracle components can find the required library
+RUN ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
 
 # Oracle instantclient
 #COPY --from=1 /tmp/instantclient-basiclite.zip /tmp/instantclient-basiclite.zip
