@@ -126,11 +126,13 @@ class OracleMetadataProvider:
                          DATA_LENGTH, DATA_PRECISION, NULLABLE as nullable  
                     FROM ALL_TAB_COLS 
                     where TABLE_NAME = :table_name AND OWNER = :schema"""  # noqa
-        results = self.__connection.perform_query(query, {"table_name": table_name, "schema": schema})
-        if not results:
-            raise TableNotFoundError(f"The specified table {schema}.{table_name} was not found.")
+        schema_norm = schema.strip().upper() if schema is not None else schema
+        table_norm = table_name.strip().upper()
+        rows = list(self.__connection.perform_query(query, {"table_name": table_norm, "schema": schema_norm}))
+        if not rows:
+            raise TableNotFoundError(f"The specified table {schema_norm}.{table_norm} was not found.")
 
-        for res in results:
+        for res in rows:
             col = ColumnSchema(name=res[0],
                                source_type_signature=self._get_column_datatype_signature(res[1], res[2], res[3],
                                                                                          res[4]),

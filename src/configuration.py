@@ -1,6 +1,6 @@
 import dataclasses
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 import dataconf
@@ -118,7 +118,7 @@ class Configuration(ConfigurationBase):
     pre_run_script: bool = False
     pre_run_scripts: Optional[Script] = None
     custom_column_mapping: bool = False
-    columns: List[ColumnMapping] = None
+    columns: List[ColumnMapping] = field(default_factory=list)
     debug: bool = False
 
     def __post_init__(self):
