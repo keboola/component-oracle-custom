@@ -53,7 +53,9 @@ class Component(ComponentBase):
 
         columns = self._map_columns(input_table.columns)
 
-        if self._configuration.pre_run_scripts and self._configuration.pre_run_scripts.script:
+        if (self._configuration.pre_run_script
+                and self._configuration.pre_run_scripts
+                and self._configuration.pre_run_scripts.script):
             logging.info(f"Pre script detected, running: {self._configuration.pre_run_scripts.script}")
             self._oracle_writer.execute_script(self._configuration.pre_run_scripts.script,
                                                self._configuration.pre_run_scripts.continue_on_failure)
@@ -76,7 +78,9 @@ class Component(ComponentBase):
                                                    method=loading_options.incremental_load_mode
                                                    )
 
-        if self._configuration.post_run_scripts and self._configuration.post_run_scripts.script:
+        if (self._configuration.post_run_script
+                and self._configuration.post_run_scripts
+                and self._configuration.post_run_scripts.script):
             logging.info(f"Post script detected, running: {self._configuration.post_run_scripts.script}")
             self._oracle_writer.execute_script(self._configuration.post_run_scripts.script,
                                                self._configuration.post_run_scripts.continue_on_failure)
