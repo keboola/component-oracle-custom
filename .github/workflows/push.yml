@@ -15,4 +15,5 @@ jobs:
       app_id: kds-team.wr-oracle-custom
       vendor: kds-team
       kbc_developerportal_username: kds-team+github
+      test_command: python -m unittest discover
     secrets: inherit
