@@ -182,10 +182,6 @@
           "pre_run_script": true
         }
       },
-      "required": [
-        "continue_on_failure",
-        "script"
-      ],
       "properties": {
         "continue_on_failure": {
           "type": "boolean",
@@ -216,10 +212,6 @@
           "post_run_script": true
         }
       },
-      "required": [
-        "continue_on_failure",
-        "script"
-      ],
       "properties": {
         "continue_on_failure": {
           "type": "boolean",
