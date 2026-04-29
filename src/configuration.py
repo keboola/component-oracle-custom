@@ -64,8 +64,8 @@ class DbOptions(ConfigurationBase):
 
 @dataclass
 class Script(ConfigurationBase):
-    continue_on_failure: bool
-    script: str
+    continue_on_failure: bool = False
+    script: Optional[str] = None
 
 
 @dataclass
