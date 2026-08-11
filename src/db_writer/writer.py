@@ -459,7 +459,22 @@ class OracleWriter:
                                        **asdict(self._sql_loader_options))
         elif method == 'query':
             self._logger.info(f"Running load mode: '{method}'")
-            self._insert_records_query(data_path, schema, table_name, columns)
+            try:
+                self._insert_records_query(data_path, schema, table_name, columns)
+            except oracledb.IntegrityError as e:
+                # The destination table refused the data (ORA-00001 duplicate key, ORA-01400 NULL,
+                # ORA-01438 value too large, ORA-0229x constraint violations) - a data/config problem
+                # the user has to resolve, so report it as a user error instead of crashing.
+                # Deliberately only IntegrityError: the broader DatabaseError also covers connection
+                # drops (DPY-4011 / ORA-03113), which are not the user's to fix.
+                error = e.args[0] if e.args else None
+                detail = getattr(error, 'message', None) or str(e)
+                raise WriterUserException(
+                    "The destination table rejected the loaded data. Please make sure the source data "
+                    "complies with the constraints of the destination table, e.g. that it contains no "
+                    "duplicate values in unique or primary key columns and no NULL or oversized values "
+                    f"in columns that do not allow them. Oracle error: {detail}",
+                    db_error=error) from e
 
     def _insert_records_query(self, data_path: str, schema: str, table_name: str, columns: List[str],
                               skip_first_line: bool = True):
